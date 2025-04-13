@@ -6,11 +6,12 @@
   "scripts": {
     "test": "jest",
     "dev": "nodemon index.js",
-    "start": "node index.js" 
+    "start": "node index.js"
   },
   "author": "YEFRIN",
   "license": "ISC",
   "dependencies": {
+    "backend": "file:",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
