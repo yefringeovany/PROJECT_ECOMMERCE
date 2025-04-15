@@ -1,40 +1,56 @@
 const express = require('express');
-const connectDB = require('./config/database'); // Asegúrate de que la ruta sea correcta
+const connectDB = require('./config/database');
+const cors = require('cors'); // Añadir CORS
 require('dotenv').config();
+
+// Importar rutas
+const userRoutes = require('./routes/UserRoutes');
 
 const app = express();
 
-// Middlewares esenciales
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Conexión a DB antes de rutas
+// Conexión a MongoDB
 connectDB();
 
-// Ruta de prueba
+// Middlewares
+app.use(cors()); // Habilita CORS para todas las rutas
+app.use(express.json());
+
+// Configuración de rutas
+app.use('/api/users', userRoutes);
+
+// Ruta de prueba mejorada
 app.get('/', (req, res) => {
   res.json({
-    status: 'API Ecommerce operativa',
-    db: mongoose.connection.readyState === 1 ? 'Conectado' : 'Desconectado'
+    status: 'success',
+    message: 'API Ecommerce funcionando',
+    version: '1.0.0',
+    documentation: '/api-docs' // Si implementas Swagger después
   });
 });
 
-// Manejo de errores global
+// Manejo de errores mejorado
+app.use((req, res, next) => {
+  res.status(404).json({
+    status: 'error',
+    message: 'Ruta no encontrada'
+  });
+});
+
 app.use((err, req, res, next) => {
-  console.error('⚠️ Error no capturado:', err.stack);
-  res.status(500).send('Error interno del servidor');
+  console.error(err.stack);
+  
+  const statusCode = err.statusCode || 500;
+  const message = err.message || 'Error interno del servidor';
+  
+  res.status(statusCode).json({
+    status: 'error',
+    message,
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }) // Solo en desarrollo
+  });
 });
 
 const PORT = process.env.PORT || 4008;
-const server = app.listen(PORT, () => {
-  console.log(`🚀 Servidor en http://localhost:${PORT}`);
-  
-});
-
-// Cierre elegante ante señales de terminación
-process.on('SIGTERM', () => {
-  server.close(() => {
-    mongoose.connection.close();
-    console.log('🔴 Servidor y conexión a DB cerrados');
-  });
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`🔗 Entorno: ${process.env.NODE_ENV || 'development'}`);
 });
