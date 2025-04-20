@@ -5,6 +5,8 @@ require('dotenv').config();
 
 // Importar rutas
 const userRoutes = require('./routes/UserRoutes');
+const productRoutes = require('./routes/ProductRoutes');
+
 
 const app = express();
 
@@ -17,6 +19,8 @@ app.use(express.json());
 
 // Configuración de rutas
 app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes);
+
 
 // Ruta de prueba mejorada
 app.get('/', (req, res) => {
